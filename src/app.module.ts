@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
 import databaseConfig from './config/database.config';
+import { AuthModule } from './modules/user/auth.module';
 
 @Module({
   imports: [
@@ -27,13 +28,13 @@ import databaseConfig from './config/database.config';
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: configService.get('database.synchronize'),
         logging: configService.get('database.logging'),
-        useUnifiedTopology: true,
-        useNewUrlParser: true,
+        authSource: configService.get('database.authSource') || 'admin',
       }),
     }),
 
     // Módulo de usuarios
     UserModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],

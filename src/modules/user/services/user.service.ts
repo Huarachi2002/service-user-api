@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MongoRepository } from 'typeorm';
 import { ObjectId } from 'mongodb';
@@ -6,12 +11,15 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import { RoleService } from './role.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: MongoRepository<User>,
+
+    private readonly roleService: RoleService,
   ) {}
 
   /**
@@ -26,31 +34,26 @@ export class UserService {
    * Crear un nuevo usuario
    */
   async create(createUserDto: CreateUserDto): Promise<User> {
-    // Verificar si el email ya existe
-    const existingEmail = await this.userRepository.findOne({
-      where: { email: createUserDto.email },
-    });
-
-    if (existingEmail) {
-      throw new ConflictException(`El email '${createUserDto.email}' ya está registrado`);
-    }
-
     // Verificar si el username ya existe
     const existingUsername = await this.userRepository.findOne({
-      where: { username: createUserDto.username },
+      where: { nombreUsuario: createUserDto.nombreUsuario },
     });
 
     if (existingUsername) {
-      throw new ConflictException(`El nombre de usuario '${createUserDto.username}' ya existe`);
+      throw new ConflictException(
+        `El nombre de usuario '${createUserDto.nombreUsuario}' ya existe`,
+      );
     }
 
+    const rol = await this.roleService.findOne(createUserDto.idRol);
+
     // Hashear la contraseña
-    const hashedPassword = await this.hashPassword(createUserDto.password);
+    const hashedPassword = await this.hashPassword(createUserDto.contrasena);
 
     const user = this.userRepository.create({
-      ...createUserDto,
-      password: hashedPassword,
-      roles: createUserDto.roles || ['user'], // Rol por defecto
+      nombreUsuario: createUserDto.nombreUsuario,
+      contrasena: hashedPassword,
+      rol: rol,
     });
 
     return await this.userRepository.save(user);
@@ -68,7 +71,7 @@ export class UserService {
    */
   async findActive(): Promise<User[]> {
     return await this.userRepository.find({
-      where: { isActive: true },
+      where: { activo: true },
     });
   }
 
@@ -92,26 +95,11 @@ export class UserService {
   }
 
   /**
-   * Buscar usuario por email
-   */
-  async findByEmail(email: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { email },
-    });
-
-    if (!user) {
-      throw new NotFoundException(`Usuario con email '${email}' no encontrado`);
-    }
-
-    return user;
-  }
-
-  /**
    * Buscar usuario por username
    */
   async findByUsername(username: string): Promise<User> {
     const user = await this.userRepository.findOne({
-      where: { username },
+      where: { nombreUsuario: username },
     });
 
     if (!user) {
@@ -122,21 +110,11 @@ export class UserService {
   }
 
   /**
-   * Verificar si existe un usuario por email (para validación desde API Gateway)
-   */
-  async existsByEmail(email: string): Promise<boolean> {
-    const user = await this.userRepository.findOne({
-      where: { email },
-    });
-    return !!user;
-  }
-
-  /**
    * Verificar si existe un usuario por username
    */
   async existsByUsername(username: string): Promise<boolean> {
     const user = await this.userRepository.findOne({
-      where: { username },
+      where: { nombreUsuario: username },
     });
     return !!user;
   }
@@ -147,31 +125,22 @@ export class UserService {
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
 
-    // Si se cambia el email, verificar que no exista
-    if (updateUserDto.email && updateUserDto.email !== user.email) {
-      const existingEmail = await this.userRepository.findOne({
-        where: { email: updateUserDto.email },
-      });
-
-      if (existingEmail) {
-        throw new ConflictException(`El email '${updateUserDto.email}' ya está registrado`);
-      }
-    }
-
     // Si se cambia el username, verificar que no exista
-    if (updateUserDto.username && updateUserDto.username !== user.username) {
+    if (updateUserDto.nombreUsuario && updateUserDto.nombreUsuario !== user.nombreUsuario) {
       const existingUsername = await this.userRepository.findOne({
-        where: { username: updateUserDto.username },
+        where: { nombreUsuario: updateUserDto.nombreUsuario },
       });
 
       if (existingUsername) {
-        throw new ConflictException(`El nombre de usuario '${updateUserDto.username}' ya existe`);
+        throw new ConflictException(
+          `El nombre de usuario '${updateUserDto.nombreUsuario}' ya existe`,
+        );
       }
     }
 
     // Si se actualiza la contraseña, hashearla
-    if (updateUserDto.password) {
-      updateUserDto.password = await this.hashPassword(updateUserDto.password);
+    if (updateUserDto.contrasena) {
+      updateUserDto.contrasena = await this.hashPassword(updateUserDto.contrasena);
     }
 
     Object.assign(user, updateUserDto);
@@ -179,20 +148,12 @@ export class UserService {
   }
 
   /**
-   * Actualizar último login
-   */
-  async updateLastLogin(id: string): Promise<User> {
-    const user = await this.findOne(id);
-    user.lastLogin = new Date();
-    return await this.userRepository.save(user);
-  }
-
-  /**
    * Asignar roles a un usuario
    */
-  async assignRoles(id: string, roles: string[]): Promise<User> {
+  async assignRoles(id: string, idRol: string): Promise<User> {
     const user = await this.findOne(id);
-    user.roles = roles;
+    const rol = await this.roleService.findOne(idRol);
+    user.rol = rol;
     return await this.userRepository.save(user);
   }
 
@@ -206,19 +167,9 @@ export class UserService {
   /**
    * Eliminar un usuario (soft delete - desactivar)
    */
-  async remove(id: string): Promise<{ message: string }> {
+  async remove(id: string): Promise<User> {
     const user = await this.findOne(id);
-    user.isActive = false;
-    await this.userRepository.save(user);
-    return { message: `Usuario '${user.username}' desactivado correctamente` };
-  }
-
-  /**
-   * Eliminar un usuario permanentemente
-   */
-  async delete(id: string): Promise<{ message: string }> {
-    const user = await this.findOne(id);
-    await this.userRepository.delete(user._id);
-    return { message: `Usuario '${user.username}' eliminado permanentemente` };
+    user.activo = false;
+    return await this.userRepository.save(user);
   }
 }

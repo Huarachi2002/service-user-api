@@ -1,7 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { RoleService } from '../services/role.service';
 import { CreateRoleDto } from '../dto/create-role.dto';
 import { UpdateRoleDto } from '../dto/update-role.dto';
+import { IApiResponse } from 'src/common/interface/api-response.interface';
 
 @Controller('roles')
 export class RoleController {
@@ -20,8 +31,13 @@ export class RoleController {
    * GET /roles - Obtener todos los roles
    */
   @Get()
-  findAll() {
-    return this.roleService.findAll();
+  async findAll(): Promise<IApiResponse> {
+    const roles = await this.roleService.findAll();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Roles retrieved successfully',
+      data: roles,
+    };
   }
 
   /**
@@ -36,8 +52,13 @@ export class RoleController {
    * GET /roles/:id - Obtener un rol por ID
    */
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.roleService.findOne(id);
+  async findOne(@Param('id') id: string): Promise<IApiResponse> {
+    const role = await this.roleService.findOne(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Role retrieved successfully',
+      data: role,
+    };
   }
 
   /**
@@ -62,13 +83,5 @@ export class RoleController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.roleService.remove(id);
-  }
-
-  /**
-   * DELETE /roles/:id/permanent - Eliminar un rol permanentemente
-   */
-  @Delete(':id/permanent')
-  delete(@Param('id') id: string) {
-    return this.roleService.delete(id);
   }
 }

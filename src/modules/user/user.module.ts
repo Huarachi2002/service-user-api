@@ -8,9 +8,7 @@ import { UserController } from './controllers/user.controller';
 import { RoleController } from './controllers/role.controller';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, Role]),
-  ],
+  imports: [TypeOrmModule.forFeature([User, Role])],
   controllers: [UserController, RoleController],
   providers: [UserService, RoleService],
   exports: [UserService, RoleService], // Exportar para uso en otros módulos

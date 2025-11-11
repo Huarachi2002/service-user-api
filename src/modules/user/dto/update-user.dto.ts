@@ -1,45 +1,23 @@
-import { IsString, IsEmail, IsOptional, MinLength, IsArray, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsBoolean } from 'class-validator';
 
 export class UpdateUserDto {
-  @IsEmail({}, { message: 'El email debe ser válido' })
+  @IsString()
   @IsOptional()
-  email?: string;
+  id?: string;
 
   @IsString()
   @IsOptional()
-  @MinLength(3, { message: 'El nombre de usuario debe tener al menos 3 caracteres' })
-  username?: string;
+  nombreUsuario?: string;
 
   @IsString()
   @IsOptional()
-  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
-  password?: string;
-
-  @IsString()
-  @IsOptional()
-  firstName?: string;
-
-  @IsString()
-  @IsOptional()
-  lastName?: string;
-
-  @IsString()
-  @IsOptional()
-  phone?: string;
-
-  @IsString()
-  @IsOptional()
-  avatar?: string;
-
-  @IsArray()
-  @IsOptional()
-  roles?: string[];
+  contrasena?: string;
 
   @IsBoolean()
   @IsOptional()
-  isActive?: boolean;
+  activo?: boolean;
 
-  @IsBoolean()
+  @IsString()
   @IsOptional()
-  isEmailVerified?: boolean;
+  idRol?: string;
 }

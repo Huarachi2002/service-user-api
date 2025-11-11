@@ -19,16 +19,15 @@ export class RoleService {
   async create(createRoleDto: CreateRoleDto): Promise<Role> {
     // Verificar si el rol ya existe
     const existingRole = await this.roleRepository.findOne({
-      where: { name: createRoleDto.name },
+      where: { descripcion: createRoleDto.descripcion },
     });
 
     if (existingRole) {
-      throw new ConflictException(`El rol '${createRoleDto.name}' ya existe`);
+      throw new ConflictException(`El rol '${createRoleDto.descripcion}' ya existe`);
     }
 
     const role = this.roleRepository.create({
       ...createRoleDto,
-      permissions: createRoleDto.permissions || [],
     });
 
     return await this.roleRepository.save(role);
@@ -46,7 +45,7 @@ export class RoleService {
    */
   async findActive(): Promise<Role[]> {
     return await this.roleRepository.find({
-      where: { isActive: true },
+      where: { estado: true },
     });
   }
 
@@ -74,7 +73,7 @@ export class RoleService {
    */
   async findByName(name: string): Promise<Role> {
     const role = await this.roleRepository.findOne({
-      where: { name },
+      where: { descripcion: name },
     });
 
     if (!role) {
@@ -90,14 +89,14 @@ export class RoleService {
   async update(id: string, updateRoleDto: UpdateRoleDto): Promise<Role> {
     const role = await this.findOne(id);
 
-    // Si se intenta cambiar el nombre, verificar que no exista otro rol con ese nombre
-    if (updateRoleDto.name && updateRoleDto.name !== role.name) {
+    // Si se intenta cambiar la descripción, verificar que no exista otro rol con esa descripción
+    if (updateRoleDto.descripcion && updateRoleDto.descripcion !== role.descripcion) {
       const existingRole = await this.roleRepository.findOne({
-        where: { name: updateRoleDto.name },
+        where: { descripcion: updateRoleDto.descripcion },
       });
 
       if (existingRole) {
-        throw new ConflictException(`El rol '${updateRoleDto.name}' ya existe`);
+        throw new ConflictException(`El rol '${updateRoleDto.descripcion}' ya existe`);
       }
     }
 
@@ -108,19 +107,9 @@ export class RoleService {
   /**
    * Eliminar un rol (soft delete - desactivar)
    */
-  async remove(id: string): Promise<{ message: string }> {
+  async remove(id: string): Promise<Role> {
     const role = await this.findOne(id);
-    role.isActive = false;
-    await this.roleRepository.save(role);
-    return { message: `Rol '${role.name}' desactivado correctamente` };
-  }
-
-  /**
-   * Eliminar un rol permanentemente
-   */
-  async delete(id: string): Promise<{ message: string }> {
-    const role = await this.findOne(id);
-    await this.roleRepository.delete(role._id);
-    return { message: `Rol '${role.name}' eliminado permanentemente` };
+    role.estado = false;
+    return await this.roleRepository.save(role);
   }
 }

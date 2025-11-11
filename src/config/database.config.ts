@@ -9,6 +9,5 @@ export default registerAs('database', () => ({
   database: process.env.DB_DATABASE || 'user_service_db',
   synchronize: process.env.NODE_ENV === 'development', // Solo en desarrollo
   logging: process.env.NODE_ENV === 'development',
-  useUnifiedTopology: true,
-  useNewUrlParser: true,
+  authSource: process.env.DB_AUTH_SOURCE || 'admin',
 }));

@@ -1,18 +1,19 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Body, 
-  Patch, 
-  Param, 
-  Delete, 
-  HttpCode, 
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  HttpCode,
   HttpStatus,
-  Query 
+  Query,
+  Put,
 } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import { IApiResponse } from 'src/common/interface/api-response.interface';
 
 @Controller('users')
 export class UserController {
@@ -23,90 +24,107 @@ export class UserController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto): Promise<IApiResponse> {
+    const user = await this.userService.create(createUserDto);
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Usuario creado con éxito',
+      data: user,
+    };
   }
 
   /**
    * GET /users - Obtener todos los usuarios
    */
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  async findAll(): Promise<IApiResponse> {
+    const users = await this.userService.findAll();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Usuarios encontrados con éxito',
+      data: users,
+    };
   }
 
   /**
    * GET /users/active - Obtener usuarios activos
    */
   @Get('active')
-  findActive() {
-    return this.userService.findActive();
-  }
-
-  /**
-   * GET /users/exists/email - Verificar si existe un email
-   */
-  @Get('exists/email')
-  async existsByEmail(@Query('email') email: string) {
-    const exists = await this.userService.existsByEmail(email);
-    return { exists };
+  async findActive(): Promise<IApiResponse> {
+    const users = await this.userService.findActive();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Usuarios activos encontrados con éxito',
+      data: users,
+    };
   }
 
   /**
    * GET /users/exists/username - Verificar si existe un username
    */
   @Get('exists/username')
-  async existsByUsername(@Query('username') username: string) {
+  async existsByUsername(@Query('username') username: string): Promise<IApiResponse> {
     const exists = await this.userService.existsByUsername(username);
-    return { exists };
-  }
-
-  /**
-   * GET /users/email/:email - Buscar usuario por email
-   */
-  @Get('email/:email')
-  findByEmail(@Param('email') email: string) {
-    return this.userService.findByEmail(email);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Verificación de existencia de nombre de usuario realizada con éxito',
+      data: exists,
+    };
   }
 
   /**
    * GET /users/username/:username - Buscar usuario por username
    */
   @Get('username/:username')
-  findByUsername(@Param('username') username: string) {
-    return this.userService.findByUsername(username);
+  async findByUsername(@Param('username') username: string): Promise<IApiResponse> {
+    const user = await this.userService.findByUsername(username);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Usuario encontrado con éxito',
+      data: user,
+    };
   }
 
   /**
    * GET /users/:id - Obtener un usuario por ID
    */
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+  async findOne(@Param('id') id: string): Promise<IApiResponse> {
+    const user = await this.userService.findOne(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Usuario encontrado con éxito',
+      data: user,
+    };
   }
 
   /**
    * PATCH /users/:id - Actualizar un usuario
    */
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<IApiResponse> {
+    const user = await this.userService.update(id, updateUserDto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Usuario actualizado con éxito',
+      data: user,
+    };
   }
 
   /**
    * PATCH /users/:id/roles - Asignar roles a un usuario
    */
-  @Patch(':id/roles')
-  assignRoles(@Param('id') id: string, @Body('roles') roles: string[]) {
-    return this.userService.assignRoles(id, roles);
-  }
-
-  /**
-   * PATCH /users/:id/last-login - Actualizar último login
-   */
-  @Patch(':id/last-login')
-  updateLastLogin(@Param('id') id: string) {
-    return this.userService.updateLastLogin(id);
+  @Put(':id/roles')
+  async assignRoles(@Param('id') id: string, @Body('idRol') idRol: string): Promise<IApiResponse> {
+    const user = await this.userService.assignRoles(id, idRol);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Roles asignados con éxito',
+      data: user,
+    };
   }
 
   /**
@@ -115,13 +133,5 @@ export class UserController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
-  }
-
-  /**
-   * DELETE /users/:id/permanent - Eliminar un usuario permanentemente
-   */
-  @Delete(':id/permanent')
-  delete(@Param('id') id: string) {
-    return this.userService.delete(id);
   }
 }

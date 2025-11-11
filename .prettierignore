@@ -1,0 +1,27 @@
+# Dependencias
+node_modules
+dist
+build
+
+# Archivos de configuración
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cobertura de tests
+coverage
+.nyc_output
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose*.yml
+
+# Documentación
+*.md

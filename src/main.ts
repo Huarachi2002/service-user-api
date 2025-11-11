@@ -24,15 +24,14 @@ async function bootstrap() {
   );
 
   // Prefijo global para todas las rutas
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api');
 
   const port = process.env.PORT || 3002;
   await app.listen(port);
-  
-  console.log(`🚀 Servicio de Usuario ejecutándose en: http://localhost:${port}/api/v1`);
+
+  console.log(`🚀 Servicio de Usuario ejecutándose en: http://localhost:${port}/api`);
   console.log(`📚 Endpoints disponibles:`);
-  console.log(`   - http://localhost:${port}/api/v1/users`);
-  console.log(`   - http://localhost:${port}/api/v1/roles`);
+  console.log(`   - http://localhost:${port}/api/users`);
+  console.log(`   - http://localhost:${port}/api/roles`);
 }
 bootstrap();
-
