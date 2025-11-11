@@ -46,6 +46,16 @@ export class UserController {
     };
   }
 
+  @Get('paciente/:idPaciente')
+  async findByIdPaciente(@Param('idPaciente') idPaciente: number): Promise<IApiResponse> {
+    const user = await this.userService.findByIdPaciente(idPaciente);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Usuario encontrado con éxito',
+      data: user,
+    };
+  }
+
   /**
    * GET /users/active - Obtener usuarios activos
    */

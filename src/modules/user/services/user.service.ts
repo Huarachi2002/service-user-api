@@ -66,6 +66,18 @@ export class UserService {
     return await this.userRepository.find();
   }
 
+  async findByIdPaciente(idPaciente: number): Promise<User> {
+    console.log('Buscando usuario con idPaciente:', idPaciente);
+    const user = await this.userRepository.findOne({
+      where: { idPaciente: idPaciente },
+    });
+    console.log('Usuario encontrado:', user);
+    if (!user) {
+      throw new NotFoundException(`Usuario con idPaciente '${idPaciente}' no encontrado`);
+    }
+    return user;
+  }
+
   /**
    * Obtener usuarios activos
    */

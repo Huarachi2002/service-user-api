@@ -1,4 +1,4 @@
-import { IsString, IsBoolean } from 'class-validator';
+import { IsString, IsBoolean, IsNumber } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
@@ -9,6 +9,12 @@ export class CreateUserDto {
 
   @IsBoolean()
   activo?: boolean = true;
+
+  @IsNumber()
+  idPaciente?: number;
+
+  @IsString()
+  tokenFcm?: string;
 
   @IsString()
   idRol: string;

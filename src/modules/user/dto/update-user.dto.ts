@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsNumber } from 'class-validator';
 
 export class UpdateUserDto {
   @IsString()
@@ -16,6 +16,14 @@ export class UpdateUserDto {
   @IsBoolean()
   @IsOptional()
   activo?: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  idPaciente?: number;
+
+  @IsString()
+  @IsOptional()
+  tokenFcm?: string;
 
   @IsString()
   @IsOptional()

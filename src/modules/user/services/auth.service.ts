@@ -32,6 +32,12 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    const tokenFcm = loginDto.tokenFcm;
+    console.log('Token FCM:', tokenFcm);
+    if (tokenFcm) {
+      user.tokenFcm = tokenFcm;
+    }
+
     const payload = {
       sub: user._id.toString(),
       nombreUsuario: user.nombreUsuario,

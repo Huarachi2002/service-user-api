@@ -13,6 +13,9 @@ export class User {
   @ObjectIdColumn()
   _id: ObjectId;
 
+  @Column({ nullable: true})
+  idPaciente?: number;
+
   @Column()
   nombreUsuario: string;
 
@@ -21,6 +24,9 @@ export class User {
 
   @Column()
   rol: Role;
+
+  @Column({ nullable: true })
+  tokenFcm?: string;
 
   @Column({ default: true })
   activo: boolean = true;

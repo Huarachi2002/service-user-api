@@ -52,8 +52,34 @@ export default class MainSeeder implements Seeder {
       .getRepository(Role)
       .findOne({ where: { descripcion: 'ADMIN' } });
 
+    const rolPatient = await dataSource
+      .getRepository(Role)
+      .findOne({ where: { descripcion: 'PATIENT' } });
+
+    const rolUserReport = await dataSource
+      .getRepository(Role)
+      .findOne({ where: { descripcion: 'USER_REPORT' } });
+    
+    const rolUserSolicitud = await dataSource
+      .getRepository(Role)
+      .findOne({ where: { descripcion: 'USER_SOLICITUD' } });
+
+    const rolUserAudit = await dataSource
+      .getRepository(Role)
+      .findOne({ where: { descripcion: 'USER_AUDIT' } });
+
     const contrasenaHash = require('bcrypt').hashSync('admin123', 10);
-    const users = [{ nombreUsuario: 'admin', contrasena: contrasenaHash, rol: rolAdmin }];
+    const contrasenaPatientHash = require('bcrypt').hashSync('123', 10);
+    const contranseaUserHash = require('bcrypt').hashSync('user123', 10);
+    const users = [
+      { nombreUsuario: 'admin', contrasena: contrasenaHash, rol: rolAdmin, idPaciente: null, tokenFcm: null, activo: true },
+      { nombreUsuario: 'paciente1', contrasena: contrasenaPatientHash, rol: rolPatient, idPaciente: null, tokenFcm: null, activo: true  },
+      { nombreUsuario: 'paciente2', contrasena: contrasenaPatientHash, rol: rolPatient, idPaciente: null, tokenFcm: null, activo: true  },
+      { nombreUsuario: 'paciente3', contrasena: contrasenaPatientHash, rol: rolPatient, idPaciente: null, tokenFcm: null, activo: true  },
+      { nombreUsuario: 'ureport', contrasena: contranseaUserHash, rol: rolUserReport, idPaciente: null, tokenFcm: null, activo: true  },
+      { nombreUsuario: 'usolicitud', contrasena: contranseaUserHash, rol: rolUserSolicitud, idPaciente: null, tokenFcm: null, activo: true },
+      { nombreUsuario: 'uaudit', contrasena: contranseaUserHash, rol: rolUserAudit, idPaciente: null, tokenFcm: null, activo: true },
+    ];
 
     for (const userData of users) {
       const user = repository.create(userData);
